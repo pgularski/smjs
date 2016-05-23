@@ -363,7 +363,7 @@ sm.StateMachine.prototype._exit_states = function(event, from_state, to_state){
             !(from_state.is_substate(state) &&
                 to_state.is_substate(state))
             || (state === from_state && state === to_state)){
-        console.log('exiting ' + state.name);
+        // console.log('exiting ' + state.name);
         var exit_event = new sm.Event(
             'exit', undefined, false, {'source_event': event});
         exit_event.state_machine = self;
@@ -389,7 +389,7 @@ sm.StateMachine.prototype._enter_states = function(event, top_state, to_state){
     // Iterate backwards? It'd be different tham pysm.
     for (var i = 0; i < path.length; i++){
         state = path[i];
-        console.log('entering ' + state.name);
+        // console.log('entering ' + state.name);
         var enter_event = new sm.Event(
             'enter', undefined, false, {'source_event': event});
         enter_event.state_machine = self;
@@ -522,84 +522,3 @@ sm.Validator.prototype.validate_initial_state = function (machine) {
         self._raise(msg);
     }
 };
-
-
-
-// ------------------------------ sanity test --------
-//var assert = require('assert');
-
-var q = new sm.Queue();
-
-var m = new sm.StateMachine('m');
-var s0 = new sm.State('s0');
-var s1 = new sm.State('s1');
-m.add_state(s0, true);
-m.add_state(s1);
-m.add_transition(s0, s1, 'a');
-m.add_transition(s1, s0, 'b');
-
-m.initialize();
-
-//assert(m.state === s0);
-//assert(m.leaf_state() === s0);
-m.dispatch(new sm.Event('nonexistent'));
-//assert(m.state === s0);
-//assert(m.leaf_state() === s0);
-
-m.dispatch(new sm.Event('a'));
-//assert(m.state === s1);
-//assert(m.leaf_state() === s1);
-
-m.dispatch(new sm.Event('a'));
-//assert(m.state === s1);
-//assert(m.leaf_state() === s1);
-
-m.dispatch(new sm.Event('b'));
-//assert(m.state === s0);
-//assert(m.leaf_state() === s0);
-console.log('---')
-
-
-var StateMachine = sm.StateMachine;
-var State = sm.State;
-var Event = sm.Event;
-var Stack = sm.Stack;
-
-
-var mm = new StateMachine('mm');
-var s0 = new StateMachine('s0');
-var s1 = new StateMachine('s1');
-var s2 = new StateMachine('s2');
-var s11 = new State('s11');
-var s21 = new State('s21');
-
-s1.handlers = {'a': function(event) { console.log('handling event...'); }};
-
-mm.add_state(s0, true);
-s0.add_state(s1, true);
-s0.add_state(s2);
-s1.add_state(s11, true);
-s2.add_state(s21, true);
-
-s1.add_transition(s11, s21, 'a',
-    undefined, function(event) {console.log('WOOOHOO, transition!');});
-s2.add_transition(s21, s1, 'a');
-
-mm.initialize();
-
-mm.dispatch(new Event('nonexistent'));
-mm.dispatch(new sm.Event('a'));
-console.log('---')
-mm.dispatch(new sm.Event('a'));
-console.log('---')
-mm.dispatch(new sm.Event('a'));
-
-
-var stack = new Stack(2);
-stack.push(1);
-stack.push(2);
-//assert(stack.stack.length === 2);
-//assert(stack.peek() === 2);
-stack.push(3);
-//assert(stack.stack.length === 2);
-//assert(stack.peek() === 3);
