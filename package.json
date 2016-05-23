@@ -1,0 +1,39 @@
+{
+  "name": "smjs",
+  "version": "0.1.1",
+  "description": "JavaScript State Machine",
+  "main": "sm.js",
+  "shortName": "sm",
+  "scripts": {
+    "test": "grunt test --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:pgularski/smjs.git"
+  },
+  "keywords": [
+    "hierarchical",
+    "state",
+    "machine",
+    "pushdown",
+    "automaton",
+    "automata",
+    "fsm",
+    "hsm",
+    "pda"
+  ],
+  "author": "Piotr Gularski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pgularski/smjs/issues"
+  },
+  "devDependencies": {
+    "grunt": "~1.0.1",
+    "grunt-contrib-jshint": "~1.0.0",
+    "grunt-contrib-nodeunit": "~1.0.0",
+    "grunt-contrib-uglify": "~1.0.1",
+    "grunt-contrib-qunit": "~1.2.0",
+    "qunitjs": "~2.0.0-rc1",
+    "grunt-contrib-connect": "~1.0.2"
+  }
+}
