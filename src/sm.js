@@ -1,4 +1,4 @@
-'use strict';
+"'use strict";
 
 var sm = {};
 
@@ -63,7 +63,7 @@ sm.Event = function (name, input, propagate, cargo) {
     self.name = name;
     self.input = input;
     self.propagate = typeof propagate !== 'undefined' ? propagate : true;
-    self.cargo = cargo
+    self.cargo = cargo;
     // self.state_machine has to be always the root state machine.
     self.state_machine = null;
 };
@@ -91,7 +91,7 @@ sm.State.prototype.is_substate = function (state) {
     if (state === self){
         return true;
     }
-    var parent = self.parent
+    var parent = self.parent;
     while (parent !== null){
         if (parent === state){
             return true;
@@ -124,7 +124,7 @@ sm.State.prototype.on = function (event) {
 sm.State.prototype._nop = function (event) {
     var self = this;
     return true;
-}
+};
 
 
 sm.TransitionContainer = function (state_machine) {
@@ -155,7 +155,7 @@ sm.TransitionContainer.prototype._get_transition_matching_condition = function(
     key = key.toString();
     var transitions = self._transitions[key] || [];
     for (var i = 0; i < transitions.length; i++){
-        if (transitions[i]['condition'](event) === true){
+        if (transitions[i].condition(event) === true){
             return transitions[i];
         }
     }
@@ -249,7 +249,7 @@ sm.StateMachine.prototype.root_machine = function () {
         machine = machine.parent;
     }
     return machine;
-}
+};
 
 sm.StateMachine.prototype.add_transition = function (
         from_state, to_state, events, input, action, condition, before, after){
@@ -273,7 +273,7 @@ sm.StateMachine.prototype.add_transition = function (
                 'condition': condition,
                 'before': before,
                 'after': after
-            }
+            };
             self._transitions.add(key, transition);
         }
     }
@@ -310,8 +310,6 @@ sm.StateMachine.prototype._get_leaf_state = function (state) {
 
 sm.StateMachine.prototype.initialize = function () {
     var self = this;
-    // TODO: Implement Deque
-    // TODO: put or append / popleft or get?
     var machines = new sm.Queue();
     machines.put(self);
     while (!machines.empty()){
@@ -319,16 +317,13 @@ sm.StateMachine.prototype.initialize = function () {
         new sm.Validator(self).validate_initial_state(machine);
         machine.state = machine.initial_state();
         var states = machine.states;
-        states.forEach(function(state){
-            if (state instanceof sm.StateMachine){
-                machines.put(state);
-            }
-        });
-        //for (var i = 0; i < states.length; i++) {
-            //if (states[i] instanceof sm.StateMachine){
-                //machines.put(states[i]);
-            //}
-        //}
+        states.forEach(addStateToMachines);
+
+    }
+    function addStateToMachines(state) {
+        if (state instanceof sm.StateMachine){
+            machines.put(state);
+        }
     }
 };
 
@@ -340,18 +335,18 @@ sm.StateMachine.prototype.dispatch = function (event) {
     if (!transition) {
         return null;
     }
-    var to_state = transition['to_state'];
-    var from_state = transition['from_state'];
+    var to_state = transition.to_state;
+    var from_state = transition.from_state;
     if (!to_state){
-        transition['action'](event);
+        transition.action(event);
         return null;
     }
 
-    transition['before'](event);
+    transition.before(event);
     var top_state = self._exit_states(event, from_state, to_state);
-    transition['action'](event);
+    transition.action(event);
     self._enter_states(event, top_state, to_state);
-    transition['after'](event);
+    transition.after(event);
 };
 
 
@@ -361,8 +356,8 @@ sm.StateMachine.prototype._exit_states = function(event, from_state, to_state){
     self.leaf_state_stack.push(state);
     while (state.parent &&
             !(from_state.is_substate(state) &&
-                to_state.is_substate(state))
-            || (state === from_state && state === to_state)){
+                to_state.is_substate(state)) ||
+            (state === from_state && state === to_state)){
         // console.log('exiting ' + state.name);
         var exit_event = new sm.Event(
             'exit', undefined, false, {'source_event': event});
@@ -402,7 +397,7 @@ sm.StateMachine.prototype._enter_states = function(event, top_state, to_state){
 sm.Validator = function (state_machine) {
     var self = this;
     self.state_machine = state_machine;
-    self.template = 'Machine "' + state_machine.name + '" error: '
+    self.template = 'Machine "' + state_machine.name + '" error: ';
 };
 
 sm.Validator.prototype._raise = function (msg) {
@@ -435,14 +430,14 @@ sm.Validator.prototype._validate_state_already_added = function (state) {
             var msg = 'Machine "' + self.state_machine.name + 
                 '" error: State "' + state.name + '" is already added to ' +
                 'machine "' + machine.name + '"';
-            self._raise(msg)
+            self._raise(msg);
         }
-        states.forEach(function(state_){
-            if (state_ instanceof sm.StateMachine){
-                machines.put(state_);
-            }
-        });
-
+        states.forEach(addStateToMachines);
+    }
+    function addStateToMachines(state) {
+        if (state instanceof sm.StateMachine){
+            machines.put(state);
+        }
     }
 };
 
@@ -462,10 +457,10 @@ sm.Validator.prototype.validate_set_initial = function (state) {
 sm.Validator.prototype.validate_add_transition = function (
         from_state, to_state, events, input) {
     var self = this;
-    self._validate_from_state(from_state)
-    self._validate_to_state(to_state)
-    self._validate_events(events)
-    self._validate_input(input)
+    self._validate_from_state(from_state);
+    self._validate_to_state(to_state);
+    self._validate_events(events);
+    self._validate_input(input);
 };
 
 
@@ -509,7 +504,7 @@ sm.Validator.prototype._validate_events = function (events) {
 sm.Validator.prototype._validate_input = function (input) {
     var self = this;
     if (!sm.hasLength(input)){
-        var msg = 'Unable to add transition, input is not iterable: ' + events;
+        var msg = 'Unable to add transition, input is not iterable: ' + input;
         self._raise(msg);
     }
 };
