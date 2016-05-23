@@ -1,0 +1,2 @@
+# smjs
+JavaScript State Machine
