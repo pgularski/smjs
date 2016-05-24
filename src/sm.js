@@ -111,7 +111,7 @@ sm.State.prototype.on = function (event) {
     var self = this;
     if (self.handlers.hasOwnProperty(event.name)){
         event.propagate = false;
-        self.handlers[event.name](event);
+        self.handlers[event.name](self, event);
     }
     // Never propagate exit/enter events, even if propagate is set to True
     if (self.parent && event.propagate &&
@@ -121,7 +121,7 @@ sm.State.prototype.on = function (event) {
 };
 
 
-sm.State.prototype._nop = function (event) {
+sm.State.prototype._nop = function (state, event) {
     var self = this;
     return true;
 };
@@ -154,8 +154,10 @@ sm.TransitionContainer.prototype._get_transition_matching_condition = function(
     var self = this;
     key = key.toString();
     var transitions = self._transitions[key] || [];
+    var from_state = self.state_machine.leaf_state();
     for (var i = 0; i < transitions.length; i++){
-        if (transitions[i].condition(event) === true){
+        var transition = transitions[i];
+        if (transition.condition(from_state, event) === true){
             return transitions[i];
         }
     }
@@ -330,27 +332,26 @@ sm.StateMachine.prototype.initialize = function () {
 
 sm.StateMachine.prototype.dispatch = function (event) {
     var self = this;
-    self.leaf_state().on(event);
+    leaf_state_before = self.leaf_state();
+    leaf_state_before.on(event);
     var transition = self.get_transition(event);
     if (!transition) {
         return null;
     }
     var to_state = transition.to_state;
     var from_state = transition.from_state;
-    if (!to_state){
-        transition.action(event);
-        return null;
-    }
-
-    transition.before(event);
+    transition.before(leaf_state_before, event);
     var top_state = self._exit_states(event, from_state, to_state);
-    transition.action(event);
+    transition.action(leaf_state_before, event);
     self._enter_states(event, top_state, to_state);
-    transition.after(event);
+    transition.after(self.leaf_state(), event);
 };
 
 
 sm.StateMachine.prototype._exit_states = function(event, from_state, to_state){
+    if(!to_state) {
+        return;
+    }
     var self = this;
     var state = self.leaf_state();
     self.leaf_state_stack.push(state);
@@ -372,6 +373,9 @@ sm.StateMachine.prototype._exit_states = function(event, from_state, to_state){
 
 
 sm.StateMachine.prototype._enter_states = function(event, top_state, to_state){
+    if(!to_state) {
+        return;
+    }
     var self = this;
     var path = [];
     var state = self._get_leaf_state(to_state);

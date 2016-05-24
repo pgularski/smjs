@@ -6,7 +6,9 @@
     var Event = sm.Event;
     var _e = Event;
 
-    var buildMachine = function() {
+    var buildMachine = function(states) {
+        if(!states) states = {};
+
         var m = new StateMachine('m');
         // exit = m.add_state('exit', terminal=True)
         var s0 = new StateMachine('s0')
@@ -18,6 +20,15 @@
         var s211 = new State('s211')
         var s212 = new State('s212')
 
+        states[m.name] = m;
+        states[s0.name] = s0;
+        states[s1.name] = s1;
+        states[s2.name] = s2;
+        states[s11.name] = s11;
+        states[s21.name] = s21;
+        states[s211.name] = s211;
+        states[s212.name] = s212;
+
         m.add_state(s0, true)
         s0.add_state(s1, true)
         s0.add_state(s2)
@@ -25,10 +36,6 @@
         s2.add_state(s21, true)
         s21.add_state(s211, true)
         s21.add_state(s212)
-
-        // states = [m, s0, s1, s11, s2, s21, s211, s212]
-        // for state in states:
-            // state.handlers = {'enter': on_enter, 'exit': on_exit}
 
         s0.add_transition(s1, s1, events='a')
         s0.add_transition(s1, s11, events='b')
@@ -93,6 +100,96 @@
         assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
         m.dispatch(new _e('z'));
         assert.equal(m.leaf_state().name, 's212', 'Invalid target state');
+    });
+
+    QUnit.test( "enter/exit actions in a complex machine", function( assert ) {
+        var test_list = [];
+        var clear_test_list = function () {
+            while(test_list.length > 0){
+                test_list.pop();
+            }
+        };
+        var on_enter = function(state, event) {
+            test_list.push(['enter', state.name]);
+        };
+        var on_exit = function(state, event){
+            test_list.push(['exit', state.name]);
+        };
+
+        var states = {};
+        var m = buildMachine(states);
+        m.initialize();
+
+        for (var name in states){
+            states[name].handlers = {'enter': on_enter, 'exit': on_exit}
+        }
+
+        clear_test_list();
+        m.dispatch(new _e('a'));
+        assert.deepEqual(test_list, [['exit', 's11'], ['exit', 's1'], ['enter', 's1'], ['enter', 's11']]);
+
+        clear_test_list();
+        m.dispatch(new _e('b'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['enter', 's11']]);
+        m.dispatch(new _e('c'));
+
+        clear_test_list();
+        m.dispatch(new _e('b'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['enter', 's211']]);
+        m.dispatch(new _e('c'));
+
+        clear_test_list();
+        m.dispatch(new _e('c'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        clear_test_list();
+        m.dispatch(new _e('c'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+
+        clear_test_list();
+        m.dispatch(new _e('d'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's1'], ['enter', 's11']]);
+        m.dispatch(new _e('c'));
+        clear_test_list();
+        m.dispatch(new _e('d'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['enter', 's211']]);
+        m.dispatch(new _e('c'));
+
+        clear_test_list();
+        m.dispatch(new _e('e'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        clear_test_list();
+        m.dispatch(new _e('e'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+
+        clear_test_list();
+        m.dispatch(new _e('f'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        clear_test_list();
+        m.dispatch(new _e('f'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+
+        clear_test_list();
+        m.dispatch(new _e('g'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        clear_test_list();
+        m.dispatch(new _e('g'));
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+
+        clear_test_list();
+        m.dispatch(new _e('z'));
+        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'], ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's212']]);
+        assert.equal(m.leaf_state().name, 's212');
+
+        clear_test_list();
+        m.dispatch(new _e('c'));
+        assert.deepEqual(test_list,  [['exit', 's212'], ['exit', 's21'], ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        assert.equal(m.leaf_state().name, 's11');
+
+        clear_test_list();
+        m.dispatch(new _e('g'));
+        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        assert.equal(m.leaf_state().name, 's211');
     });
 
 }());
