@@ -64,8 +64,8 @@ sm.Event = function (name, input, propagate, cargo) {
     self.input = input;
     self.propagate = typeof propagate !== 'undefined' ? propagate : true;
     self.cargo = cargo;
-    // self.state_machine has to be always the root state machine.
-    self.state_machine = null;
+    // self.stateMachine has to be always the root state machine.
+    self.stateMachine = null;
 };
 
 
@@ -76,7 +76,7 @@ sm.State = function (name) {
     self.id = sm.id++;
     self.handlers = {};
     self.initial = false;
-    self.register_handlers();
+    self.registerHandlers();
 };
 
 
@@ -86,7 +86,7 @@ sm.State.prototype.toString = function () {
 };
 
 
-sm.State.prototype.is_substate = function (state) {
+sm.State.prototype.isSubstate = function (state) {
     var self = this;
     if (state === self){
         return true;
@@ -102,7 +102,7 @@ sm.State.prototype.is_substate = function (state) {
 };
 
 
-sm.State.prototype.register_handlers = function () {
+sm.State.prototype.registerHandlers = function () {
     var self = this;
 };
 
@@ -127,9 +127,9 @@ sm.State.prototype._nop = function (state, event) {
 };
 
 
-sm.TransitionContainer = function (state_machine) {
+sm.TransitionContainer = function (stateMachine) {
     var self = this;
-    self.state_machine = state_machine;
+    self.stateMachine = stateMachine;
     self._transitions = {};
 };
 
@@ -145,19 +145,19 @@ sm.TransitionContainer.prototype.add = function (key, transition) {
 
 sm.TransitionContainer.prototype.get = function (event) {
     var self = this;
-    var key = [self.state_machine.state, event.name, event.input];
-    return self._get_transition_matching_condition(key, event);
+    var key = [self.stateMachine.state, event.name, event.input];
+    return self._getTransitionMatchingCondition(key, event);
 };
 
-sm.TransitionContainer.prototype._get_transition_matching_condition = function(
+sm.TransitionContainer.prototype._getTransitionMatchingCondition = function(
         key, event) {
     var self = this;
     key = key.toString();
     var transitions = self._transitions[key] || [];
-    var from_state = self.state_machine.leaf_state();
+    var fromState = self.stateMachine.leafState();
     for (var i = 0; i < transitions.length; i++){
         var transition = transitions[i];
-        if (transition.condition(from_state, event) === true){
+        if (transition.condition(fromState, event) === true){
             return transitions[i];
         }
     }
@@ -195,43 +195,43 @@ sm.StateMachine = function (name) {
     self.states = [];
     self.state = null;
     self._transitions = new sm.TransitionContainer(self);
-    self.state_stack = new sm.Stack(32);
-    self.leaf_state_stack = new sm.Stack(32);
+    self.stateStack = new sm.Stack(32);
+    self.leafStateStack = new sm.Stack(32);
     self.stack = new sm.Stack();
 };
 sm.StateMachine.prototype = new sm.State();
 sm.StateMachine.prototype.constructor = sm.StateMachine;
 
 
-sm.StateMachine.prototype.add_state = function (state, initial) {
+sm.StateMachine.prototype.addState = function (state, initial) {
     var self = this;
-    new sm.Validator(self).validate_add_state(state, initial);
+    new sm.Validator(self).validateAddState(state, initial);
     state.initial = initial;
     state.parent = self;
     self.states.push(state);
 };
 
 
-sm.StateMachine.prototype.add_states = function (states) {
+sm.StateMachine.prototype.addStates = function (states) {
     var self = this;
     for (var i = 0; i < states.length; i++) {
         self.states.push(states[i]);
     }
 };
 
-sm.StateMachine.prototype.set_initial_state = function (state) {
+sm.StateMachine.prototype.setInitialState = function (state) {
     var self = this;
-    new sm.Validator(self).validate_set_initial(state);
+    new sm.Validator(self).validateSetInitial(state);
     state.initial = true;
 };
 
 
-sm.StateMachine.prototype.initial_state = function () {
+sm.StateMachine.prototype.initialState = function () {
     var self = this;
-    var initial_state = null;
+    var initialState = null;
     //self.states.forEach(function(state) {
         //if (state.initial) {
-            //initial_state = state;;
+            //initialState = state;;
         //}
     //});
     for (var i = 0; i < self.states.length; i++){
@@ -240,11 +240,11 @@ sm.StateMachine.prototype.initial_state = function () {
             return state;
         }
     }
-    return initial_state;
+    return initialState;
 };
 
 
-sm.StateMachine.prototype.root_machine = function () {
+sm.StateMachine.prototype.rootMachine = function () {
     var self = this;
     var machine = self;
     while (machine.parent) {
@@ -253,8 +253,8 @@ sm.StateMachine.prototype.root_machine = function () {
     return machine;
 };
 
-sm.StateMachine.prototype.add_transition = function (
-        from_state, to_state, events, input, action, condition, before, after){
+sm.StateMachine.prototype.addTransition = function (
+        fromState, toState, events, input, action, condition, before, after){
     var self = this;
     if (!input) { input = [null]; }
     if (!action){ action = self._nop; }
@@ -262,15 +262,15 @@ sm.StateMachine.prototype.add_transition = function (
     if (!after){ after = self._nop; }
     if (!condition){ condition = self._nop; }
 
-    new sm.Validator(self).validate_add_transition(
-        from_state, to_state, events, input);
+    new sm.Validator(self).validateAddTransition(
+        fromState, toState, events, input);
 
     for (var i = 0; i < input.length; i++){
         for (var j = 0; j < events.length; j++){
-            var key = [from_state, events[j], input[i]];
+            var key = [fromState, events[j], input[i]];
             var transition = {
-                'from_state': from_state,
-                'to_state': to_state,
+                'fromState': fromState,
+                'toState': toState,
                 'action': action,
                 'condition': condition,
                 'before': before,
@@ -282,9 +282,9 @@ sm.StateMachine.prototype.add_transition = function (
 };
 
 
-sm.StateMachine.prototype.get_transition = function (event) {
+sm.StateMachine.prototype.getTransition = function (event) {
     var self = this;
-    var machine = self.leaf_state().parent;
+    var machine = self.leafState().parent;
     while (machine) {
         var transition = machine._transitions.get(event);
         if (transition) {
@@ -295,13 +295,13 @@ sm.StateMachine.prototype.get_transition = function (event) {
 };
 
 
-sm.StateMachine.prototype.leaf_state = function () {
+sm.StateMachine.prototype.leafState = function () {
     var self = this;
-    return self._get_leaf_state(self);
+    return self._getLeafState(self);
 };
 
 
-sm.StateMachine.prototype._get_leaf_state = function (state) {
+sm.StateMachine.prototype._getLeafState = function (state) {
     var self = this;
     while (state.hasOwnProperty('state') && state.state) {
         state = state.state;
@@ -316,8 +316,8 @@ sm.StateMachine.prototype.initialize = function () {
     machines.put(self);
     while (!machines.empty()){
         var machine = machines.get();
-        new sm.Validator(self).validate_initial_state(machine);
-        machine.state = machine.initial_state();
+        new sm.Validator(self).validateInitialState(machine);
+        machine.state = machine.initialState();
         var states = machine.states;
         states.forEach(addStateToMachines);
 
@@ -332,55 +332,55 @@ sm.StateMachine.prototype.initialize = function () {
 
 sm.StateMachine.prototype.dispatch = function (event) {
     var self = this;
-    leaf_state_before = self.leaf_state();
-    leaf_state_before.on(event);
-    var transition = self.get_transition(event);
+    leafStateBefore = self.leafState();
+    leafStateBefore.on(event);
+    var transition = self.getTransition(event);
     if (!transition) {
         return null;
     }
-    var to_state = transition.to_state;
-    var from_state = transition.from_state;
-    transition.before(leaf_state_before, event);
-    var top_state = self._exit_states(event, from_state, to_state);
-    transition.action(leaf_state_before, event);
-    self._enter_states(event, top_state, to_state);
-    transition.after(self.leaf_state(), event);
+    var toState = transition.toState;
+    var fromState = transition.fromState;
+    transition.before(leafStateBefore, event);
+    var topState = self._exitStates(event, fromState, toState);
+    transition.action(leafStateBefore, event);
+    self._enterStates(event, topState, toState);
+    transition.after(self.leafState(), event);
 };
 
 
-sm.StateMachine.prototype._exit_states = function(event, from_state, to_state){
-    if(!to_state) {
+sm.StateMachine.prototype._exitStates = function(event, fromState, toState){
+    if(!toState) {
         return;
     }
     var self = this;
-    var state = self.leaf_state();
-    self.leaf_state_stack.push(state);
+    var state = self.leafState();
+    self.leafStateStack.push(state);
     while (state.parent &&
-            !(from_state.is_substate(state) &&
-                to_state.is_substate(state)) ||
-            (state === from_state && state === to_state)){
+            !(fromState.isSubstate(state) &&
+                toState.isSubstate(state)) ||
+            (state === fromState && state === toState)){
         // console.log('exiting ' + state.name);
-        var exit_event = new sm.Event(
-            'exit', undefined, false, {'source_event': event});
-        exit_event.state_machine = self;
-        state.on(exit_event);
-        state.parent.state_stack.push(state);
-        state.parent.state = state.parent.initial_state();
+        var exitEvent = new sm.Event(
+            'exit', undefined, false, {'sourceEvent': event});
+        exitEvent.stateMachine = self;
+        state.on(exitEvent);
+        state.parent.stateStack.push(state);
+        state.parent.state = state.parent.initialState();
         state = state.parent;
     }
     return state;
 };
 
 
-sm.StateMachine.prototype._enter_states = function(event, top_state, to_state){
-    if(!to_state) {
+sm.StateMachine.prototype._enterStates = function(event, topState, toState){
+    if(!toState) {
         return;
     }
     var self = this;
     var path = [];
-    var state = self._get_leaf_state(to_state);
+    var state = self._getLeafState(toState);
 
-    while (state.parent && state !== top_state) {
+    while (state.parent && state !== topState) {
         path.push(state);
         state = state.parent;
     }
@@ -389,19 +389,19 @@ sm.StateMachine.prototype._enter_states = function(event, top_state, to_state){
     for (var i = 0; i < path.length; i++){
         state = path[i];
         // console.log('entering ' + state.name);
-        var enter_event = new sm.Event(
-            'enter', undefined, false, {'source_event': event});
-        enter_event.state_machine = self;
-        state.on(enter_event);
+        var enterEvent = new sm.Event(
+            'enter', undefined, false, {'sourceEvent': event});
+        enterEvent.stateMachine = self;
+        state.on(enterEvent);
         state.parent.state = state;
     }
 };
 
 
-sm.Validator = function (state_machine) {
+sm.Validator = function (stateMachine) {
     var self = this;
-    self.state_machine = state_machine;
-    self.template = 'Machine "' + state_machine.name + '" error: ';
+    self.stateMachine = stateMachine;
+    self.template = 'Machine "' + stateMachine.name + '" error: ';
 };
 
 sm.Validator.prototype._raise = function (msg) {
@@ -410,28 +410,28 @@ sm.Validator.prototype._raise = function (msg) {
 };
 
 
-sm.Validator.prototype.validate_add_state = function (state, initial) {
+sm.Validator.prototype.validateAddState = function (state, initial) {
     var self = this;
     if(!(state instanceof sm.State)){
         var msg = 'Unable to add state of type ' + sm.toType(state);
         self._raise(msg);
     }
-    self._validate_state_already_added(state);
+    self._validateStateAlreadyAdded(state);
     if (initial){
-        self.validate_set_initial(state);
+        self.validateSetInitial(state);
     }
 };
 
-sm.Validator.prototype._validate_state_already_added = function (state) {
+sm.Validator.prototype._validateStateAlreadyAdded = function (state) {
     var self = this;
-    var root_machine = self.state_machine.root_machine();
+    var rootMachine = self.stateMachine.rootMachine();
     var machines = new sm.Queue();
-    machines.put(root_machine);
+    machines.put(rootMachine);
     while(!machines.empty()){
         var machine = machines.get();
         var states = machine.states;
-        if (states.indexOf(state) >= 0 && machine !== self.state_machine){
-            var msg = 'Machine "' + self.state_machine.name + 
+        if (states.indexOf(state) >= 0 && machine !== self.stateMachine){
+            var msg = 'Machine "' + self.stateMachine.name + 
                 '" error: State "' + state.name + '" is already added to ' +
                 'machine "' + machine.name + '"';
             self._raise(msg);
@@ -445,57 +445,57 @@ sm.Validator.prototype._validate_state_already_added = function (state) {
     }
 };
 
-sm.Validator.prototype.validate_set_initial = function (state) {
+sm.Validator.prototype.validateSetInitial = function (state) {
     var self = this;
-    var states = self.state_machine.states;
-    states.forEach(function(added_state){
-        if(added_state.initial && added_state !== state){
+    var states = self.stateMachine.states;
+    states.forEach(function(addedState){
+        if(addedState.initial && addedState !== state){
             var msg = 'Unable to set initial state to "' + state.name + '". ' +
-               'Initial state is already set to "' + added_state.name + '"';
+               'Initial state is already set to "' + addedState.name + '"';
             self._raise(msg);
         }
     });
 };
 
 
-sm.Validator.prototype.validate_add_transition = function (
-        from_state, to_state, events, input) {
+sm.Validator.prototype.validateAddTransition = function (
+        fromState, toState, events, input) {
     var self = this;
-    self._validate_from_state(from_state);
-    self._validate_to_state(to_state);
-    self._validate_events(events);
-    self._validate_input(input);
+    self._validateFromState(fromState);
+    self._validateToState(toState);
+    self._validateEvents(events);
+    self._validateInput(input);
 };
 
 
-sm.Validator.prototype._validate_from_state = function (from_state) {
+sm.Validator.prototype._validateFromState = function (fromState) {
     var self = this;
-    if(self.state_machine.states.indexOf(from_state) < 0){
+    if(self.stateMachine.states.indexOf(fromState) < 0){
         var msg = 'Unable to add transition from unknown state "' +
-            from_state.name + '"';
+            fromState.name + '"';
         self._raise(msg);
     }
 };
 
 
-sm.Validator.prototype._validate_to_state = function (to_state) {
+sm.Validator.prototype._validateToState = function (toState) {
     var self = this;
-    var root_machine = self.state_machine.root_machine();
-    if(!to_state){
+    var rootMachine = self.stateMachine.rootMachine();
+    if(!toState){
         return;
     }
-    else if (to_state === root_machine) {
+    else if (toState === rootMachine) {
         return;
     }
-    else if (!to_state.is_substate(root_machine)){
+    else if (!toState.isSubstate(rootMachine)){
         var msg = 'Unable to add transition to unknown state "' +
-            to_state.name + '"';
+            toState.name + '"';
         self._raise(msg);
     }
 };
 
 
-sm.Validator.prototype._validate_events = function (events) {
+sm.Validator.prototype._validateEvents = function (events) {
     var self = this;
     if (!sm.hasLength(events)){
         var msg = 'Unable to add transition, events is not iterable: ' +
@@ -505,7 +505,7 @@ sm.Validator.prototype._validate_events = function (events) {
 };
 
 
-sm.Validator.prototype._validate_input = function (input) {
+sm.Validator.prototype._validateInput = function (input) {
     var self = this;
     if (!sm.hasLength(input)){
         var msg = 'Unable to add transition, input is not iterable: ' + input;
@@ -514,9 +514,9 @@ sm.Validator.prototype._validate_input = function (input) {
 };
 
 
-sm.Validator.prototype.validate_initial_state = function (machine) {
+sm.Validator.prototype.validateInitialState = function (machine) {
     var self = this;
-    if(machine.states.length > 0 && !machine.initial_state()){
+    if(machine.states.length > 0 && !machine.initialState()){
         var msg = 'Machine "' + machine.name + '" has no initial state';
         self._raise(msg);
     }

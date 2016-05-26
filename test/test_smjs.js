@@ -10,7 +10,7 @@
         if(!states) states = {};
 
         var m = new StateMachine('m');
-        // exit = m.add_state('exit', terminal=True)
+        // exit = m.addState('exit', terminal=True)
         var s0 = new StateMachine('s0')
         var s1 = new StateMachine('s1')
         var s2 = new StateMachine('s2')
@@ -29,27 +29,27 @@
         states[s211.name] = s211;
         states[s212.name] = s212;
 
-        m.add_state(s0, true)
-        s0.add_state(s1, true)
-        s0.add_state(s2)
-        s1.add_state(s11, true)
-        s2.add_state(s21, true)
-        s21.add_state(s211, true)
-        s21.add_state(s212)
+        m.addState(s0, true)
+        s0.addState(s1, true)
+        s0.addState(s2)
+        s1.addState(s11, true)
+        s2.addState(s21, true)
+        s21.addState(s211, true)
+        s21.addState(s212)
 
-        s0.add_transition(s1, s1, events='a')
-        s0.add_transition(s1, s11, events='b')
-        s2.add_transition(s21, s211, events='b')
-        s0.add_transition(s1, s2, events='c')
-        s0.add_transition(s2, s1, events='c')
-        s0.add_transition(s1, s0, events='d')
-        s21.add_transition(s211, s21, events='d')
-        m.add_transition(s0, s211, events='e')
-        m.add_transition(s0, s212, events='z')
-        s0.add_transition(s2, s11, events='f')
-        s0.add_transition(s1, s211, events='f')
-        s1.add_transition(s11, s211, events='g')
-        s21.add_transition(s211, s0, events='g')
+        s0.addTransition(s1, s1, events='a')
+        s0.addTransition(s1, s11, events='b')
+        s2.addTransition(s21, s211, events='b')
+        s0.addTransition(s1, s2, events='c')
+        s0.addTransition(s2, s1, events='c')
+        s0.addTransition(s1, s0, events='d')
+        s21.addTransition(s211, s21, events='d')
+        m.addTransition(s0, s211, events='e')
+        m.addTransition(s0, s212, events='z')
+        s0.addTransition(s2, s11, events='f')
+        s0.addTransition(s1, s211, events='f')
+        s1.addTransition(s11, s211, events='g')
+        s21.addTransition(s211, s0, events='g')
 
         return m;
     };
@@ -67,53 +67,53 @@
     QUnit.test( "Transitions without actions", function( assert ) {
         var m = buildMachine();
         m.initialize();
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('a'));
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('b'));
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('c'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('d'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('e'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('c'));  // Bring it back to 's11'
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('d'));
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('e'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('f'));
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('f'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('g'));
-        assert.equal(m.leaf_state().name, 's11', 'Invalid target state');
+        assert.equal(m.leafState().name, 's11', 'Invalid target state');
         m.dispatch(new _e('g'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('z'));
-        assert.equal(m.leaf_state().name, 's212', 'Invalid target state');
+        assert.equal(m.leafState().name, 's212', 'Invalid target state');
         m.dispatch(new _e('g'));  // Nothing should happen
-        assert.equal(m.leaf_state().name, 's212', 'Invalid target state');
+        assert.equal(m.leafState().name, 's212', 'Invalid target state');
         m.dispatch(new _e('e'));
-        assert.equal(m.leaf_state().name, 's211', 'Invalid target state');
+        assert.equal(m.leafState().name, 's211', 'Invalid target state');
         m.dispatch(new _e('z'));
-        assert.equal(m.leaf_state().name, 's212', 'Invalid target state');
+        assert.equal(m.leafState().name, 's212', 'Invalid target state');
     });
 
     QUnit.test( "enter/exit actions in a complex machine", function( assert ) {
-        var test_list = [];
-        var clear_test_list = function () {
-            while(test_list.length > 0){
-                test_list.pop();
+        var testList = [];
+        var clearTestList = function () {
+            while(testList.length > 0){
+                testList.pop();
             }
         };
-        var on_enter = function(state, event) {
-            test_list.push(['enter', state.name]);
+        var onEnter = function(state, event) {
+            testList.push(['enter', state.name]);
         };
-        var on_exit = function(state, event){
-            test_list.push(['exit', state.name]);
+        var onExit = function(state, event){
+            testList.push(['exit', state.name]);
         };
 
         var states = {};
@@ -121,126 +121,126 @@
         m.initialize();
 
         for (var name in states){
-            states[name].handlers = {'enter': on_enter, 'exit': on_exit}
+            states[name].handlers = {'enter': onEnter, 'exit': onExit}
         }
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('a'));
-        assert.deepEqual(test_list, [['exit', 's11'], ['exit', 's1'], ['enter', 's1'], ['enter', 's11']]);
+        assert.deepEqual(testList, [['exit', 's11'], ['exit', 's1'], ['enter', 's1'], ['enter', 's11']]);
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('b'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['enter', 's11']]);
+        assert.deepEqual(testList,  [['exit', 's11'], ['enter', 's11']]);
         m.dispatch(new _e('c'));
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('b'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['enter', 's211']]);
+        assert.deepEqual(testList,  [['exit', 's211'], ['enter', 's211']]);
         m.dispatch(new _e('c'));
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('c'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
-        clear_test_list();
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        clearTestList();
         m.dispatch(new _e('c'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        assert.deepEqual(testList,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('d'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's1'], ['enter', 's11']]);
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's1'], ['enter', 's11']]);
         m.dispatch(new _e('c'));
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('d'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['enter', 's211']]);
+        assert.deepEqual(testList,  [['exit', 's211'], ['enter', 's211']]);
         m.dispatch(new _e('c'));
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('e'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
-        clear_test_list();
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        clearTestList();
         m.dispatch(new _e('e'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        assert.deepEqual(testList,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('f'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
-        clear_test_list();
+        assert.deepEqual(testList,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        clearTestList();
         m.dispatch(new _e('f'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('g'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
-        clear_test_list();
+        assert.deepEqual(testList,  [['exit', 's211'], ['exit', 's21'],  ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        clearTestList();
         m.dispatch(new _e('g'));
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('z'));
-        assert.deepEqual(test_list,  [['exit', 's211'], ['exit', 's21'], ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's212']]);
-        assert.equal(m.leaf_state().name, 's212');
+        assert.deepEqual(testList,  [['exit', 's211'], ['exit', 's21'], ['exit', 's2'], ['enter', 's2'], ['enter', 's21'], ['enter', 's212']]);
+        assert.equal(m.leafState().name, 's212');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('c'));
-        assert.deepEqual(test_list,  [['exit', 's212'], ['exit', 's21'], ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList,  [['exit', 's212'], ['exit', 's21'], ['exit', 's2'], ['enter', 's1'], ['enter', 's11']]);
+        assert.equal(m.leafState().name, 's11');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('g'));
-        assert.equal(m.leaf_state().name, 's211');
-        assert.deepEqual(test_list,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.equal(m.leafState().name, 's211');
+        assert.deepEqual(testList,  [['exit', 's11'], ['exit', 's1'],  ['enter', 's2'], ['enter', 's21'], ['enter', 's211']]);
+        assert.equal(m.leafState().name, 's211');
     });
 
 
     QUnit.test( "Transitions with actions", function( assert ) {
         var foo = true;
 
-        var test_list = [];
-        var clear_test_list = function () {
-            while(test_list.length > 0){
-                test_list.pop();
+        var testList = [];
+        var clearTestList = function () {
+            while(testList.length > 0){
+                testList.pop();
             }
         };
 
-        var on_enter = function(state, event) {
-            test_list.push(['enter', state.name]);
+        var onEnter = function(state, event) {
+            testList.push(['enter', state.name]);
         };
-        var on_exit = function(state, event){
-            test_list.push(['exit', state.name]);
-        };
-
-        var action_i = function (state, event) {
-            test_list.push('action_i');
+        var onExit = function(state, event){
+            testList.push(['exit', state.name]);
         };
 
-        var action_j = function (state, event) {
-            test_list.push('action_j');
+        var actionI = function (state, event) {
+            testList.push('actionI');
         };
 
-        var action_k = function (state, event) {
-            test_list.push('action_k');
+        var actionJ = function (state, event) {
+            testList.push('actionJ');
         };
 
-        var action_l = function (state, event) {
-            test_list.push('action_l');
+        var actionK = function (state, event) {
+            testList.push('actionK');
         };
 
-        var action_m = function (state, event) {
-            test_list.push('action_m');
+        var actionL = function (state, event) {
+            testList.push('actionL');
         };
 
-        var action_n = function (state, event) {
-            test_list.push('action_n');
+        var actionM = function (state, event) {
+            testList.push('actionM');
         };
 
-        var unset_foo = function (state, event) {
-            test_list.push('unset_foo');
+        var actionN = function (state, event) {
+            testList.push('actionN');
+        };
+
+        var unsetFoo = function (state, event) {
+            testList.push('unsetFoo');
             foo = false;
         };
 
-        var set_foo = function (state, event) {
-            test_list.push('set_foo');
+        var setFoo = function (state, event) {
+            testList.push('setFoo');
             foo = true;
         };
 
@@ -254,95 +254,95 @@
         var s211 = states.s211;
 
         // Internal transitions
-        m.add_transition(s0, null, events='i', null, action=action_i);
-        s0.add_transition(s1, null, events='j', null, action=action_j);
-        s0.add_transition(s2, null, events='k', null, action=action_k);
-        s1.add_transition(s11, null, events='n', null, action=action_n);
-        s1.add_transition(s11, null, events='h', null, action=unset_foo,
+        m.addTransition(s0, null, events='i', null, action=actionI);
+        s0.addTransition(s1, null, events='j', null, action=actionJ);
+        s0.addTransition(s2, null, events='k', null, action=actionK);
+        s1.addTransition(s11, null, events='n', null, action=actionN);
+        s1.addTransition(s11, null, events='h', null, action=unsetFoo,
             condition=function(s, e) {return foo === true });
-        s2.add_transition(s21, null, events='l', null, action=action_l,
+        s2.addTransition(s21, null, events='l', null, action=actionL,
             condition=function(s, e) {return foo === true});
-        s21.add_transition(s211, null, events='m', null, action=action_m);
+        s21.addTransition(s211, null, events='m', null, action=actionM);
         // External transition
-        s2.add_transition(s21, s21, events='h', null, action=set_foo,
+        s2.addTransition(s21, s21, events='h', null, action=setFoo,
             condition=function(s, e) {return foo === false});
 
         for (var name in states){
-            states[name].handlers = {'enter': on_enter, 'exit': on_exit}
+            states[name].handlers = {'enter': onEnter, 'exit': onExit}
         }
 
         m.initialize();
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('i'));
-        assert.deepEqual(test_list, ['action_i']);
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList, ['actionI']);
+        assert.equal(m.leafState().name, 's11');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('j'))
-        assert.deepEqual(test_list, ['action_j']);
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList, ['actionJ']);
+        assert.equal(m.leafState().name, 's11');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('n'))
-        assert.deepEqual(test_list, ['action_n']);
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList, ['actionN']);
+        assert.equal(m.leafState().name, 's11');
 
         // This transition toggles state between s11 and s211
         m.dispatch(new _e('c'))
-        assert.equal(m.leaf_state().name, 's211');
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('i'))
-        assert.deepEqual(test_list, ['action_i']);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(testList, ['actionI']);
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('k'))
-        assert.deepEqual(test_list, ['action_k']);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(testList, ['actionK']);
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('m'))
-        assert.deepEqual(test_list, ['action_m']);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(testList, ['actionM']);
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('n'))
-        assert.deepEqual(test_list, []);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(testList, []);
+        assert.equal(m.leafState().name, 's211');
 
         // This transition toggles state between s11 and s211
         m.dispatch(new _e('c'))
-        assert.equal(m.leaf_state().name, 's11');
+        assert.equal(m.leafState().name, 's11');
 
-        clear_test_list();
+        clearTestList();
         assert.equal(foo, true);
         m.dispatch(new _e('h'))
         assert.equal(foo, false);
-        assert.deepEqual(test_list, ['unset_foo']);
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList, ['unsetFoo']);
+        assert.equal(m.leafState().name, 's11');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('h'))
-        assert.deepEqual(test_list, []);  // Do nothing if foo is false
-        assert.equal(m.leaf_state().name, 's11');
+        assert.deepEqual(testList, []);  // Do nothing if foo is false
+        assert.equal(m.leafState().name, 's11');
 
         // This transition toggles state between s11 and s211
         m.dispatch(new _e('c'))
-        assert.equal(m.leaf_state().name, 's211');
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         assert.equal(foo, false);
         m.dispatch(new _e('h'));
-        assert.deepEqual(test_list, [['exit', 's211'], ['exit', 's21'], 'set_foo', ['enter', 's21'], ['enter', 's211']]);
+        assert.deepEqual(testList, [['exit', 's211'], ['exit', 's21'], 'setFoo', ['enter', 's21'], ['enter', 's211']]);
         assert.equal(foo, true);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.equal(m.leafState().name, 's211');
 
-        clear_test_list();
+        clearTestList();
         m.dispatch(new _e('h'))
-        assert.deepEqual(test_list, []);
-        assert.equal(m.leaf_state().name, 's211');
+        assert.deepEqual(testList, []);
+        assert.equal(m.leafState().name, 's211');
 
     });
 
