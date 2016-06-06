@@ -64,6 +64,13 @@
         assert.ok( m , "Machine should be created" );
     });
 
+    QUnit.test( "Check stack size", function( assert ) {
+        var m = buildMachine();
+        assert.equal(m.STACK_SIZE, 32);
+        assert.equal(m.leafStateStack.maxlen, 32);
+        assert.equal(m.stateStack.maxlen, 32);
+    });
+
     QUnit.test( "Transitions without actions", function( assert ) {
         var m = buildMachine();
         m.initialize();

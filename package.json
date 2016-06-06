@@ -1,6 +1,6 @@
 {
   "name": "smjs",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "JavaScript State Machine",
   "main": "sm.js",
   "shortName": "sm",

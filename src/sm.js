@@ -58,11 +58,11 @@ sm.StateMachineException = function(message) {
 };
 
 
-sm.Event = function (name, input, propagate, cargo) {
+sm.Event = function (name, input, cargo) {
     var self = this;
     self.name = name;
     self.input = input;
-    self.propagate = typeof propagate !== 'undefined' ? propagate : true;
+    self.propagate = true;
     self.cargo = cargo;
     // self.stateMachine has to be always the root state machine.
     self.stateMachine = null;
@@ -107,7 +107,7 @@ sm.State.prototype.registerHandlers = function () {
 };
 
 
-sm.State.prototype.on = function (event) {
+sm.State.prototype._on = function (event) {
     var self = this;
     if (self.handlers.hasOwnProperty(event.name)){
         event.propagate = false;
@@ -116,7 +116,7 @@ sm.State.prototype.on = function (event) {
     // Never propagate exit/enter events, even if propagate is set to True
     if (self.parent && event.propagate &&
             (event.name !== 'exit' || event.name !== 'enter')){
-        self.parent.on(event);
+        self.parent._on(event);
     }
 };
 
@@ -195,13 +195,14 @@ sm.StateMachine = function (name) {
     self.states = [];
     self.state = null;
     self._transitions = new sm.TransitionContainer(self);
-    self.stateStack = new sm.Stack(32);
-    self.leafStateStack = new sm.Stack(32);
+    self.stateStack = new sm.Stack(sm.StateMachine.STACK_SIZE);
+    self.leafStateStack = new sm.Stack(sm.StateMachine.STACK_SIZE);
     self.stack = new sm.Stack();
 };
 sm.StateMachine.prototype = new sm.State();
 sm.StateMachine.prototype.constructor = sm.StateMachine;
-
+sm.StateMachine.prototype.STACK_SIZE = 32;
+sm.StateMachine.STACK_SIZE = sm.StateMachine.prototype.STACK_SIZE;
 
 sm.StateMachine.prototype.addState = function (state, initial) {
     var self = this;
@@ -229,11 +230,6 @@ sm.StateMachine.prototype.setInitialState = function (state) {
 sm.StateMachine.prototype.initialState = function () {
     var self = this;
     var initialState = null;
-    //self.states.forEach(function(state) {
-        //if (state.initial) {
-            //initialState = state;;
-        //}
-    //});
     for (var i = 0; i < self.states.length; i++){
         var state = self.states[i];
         if (state.initial) {
@@ -282,7 +278,7 @@ sm.StateMachine.prototype.addTransition = function (
 };
 
 
-sm.StateMachine.prototype.getTransition = function (event) {
+sm.StateMachine.prototype._getTransition = function (event) {
     var self = this;
     var machine = self.leafState().parent;
     while (machine) {
@@ -333,8 +329,8 @@ sm.StateMachine.prototype.initialize = function () {
 sm.StateMachine.prototype.dispatch = function (event) {
     var self = this;
     leafStateBefore = self.leafState();
-    leafStateBefore.on(event);
-    var transition = self.getTransition(event);
+    leafStateBefore._on(event);
+    var transition = self._getTransition(event);
     if (!transition) {
         return null;
     }
@@ -363,7 +359,7 @@ sm.StateMachine.prototype._exitStates = function(event, fromState, toState){
         var exitEvent = new sm.Event(
             'exit', undefined, false, {'sourceEvent': event});
         exitEvent.stateMachine = self;
-        state.on(exitEvent);
+        state._on(exitEvent);
         state.parent.stateStack.push(state);
         state.parent.state = state.parent.initialState();
         state = state.parent;
@@ -392,7 +388,7 @@ sm.StateMachine.prototype._enterStates = function(event, topState, toState){
         var enterEvent = new sm.Event(
             'enter', undefined, false, {'sourceEvent': event});
         enterEvent.stateMachine = self;
-        state.on(enterEvent);
+        state._on(enterEvent);
         state.parent.state = state;
     }
 };
