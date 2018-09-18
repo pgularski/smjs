@@ -8,6 +8,7 @@ matrix:
     - node_js: "4.0"
       env: BROWSER=true
 before_install:
+  - apt-get install nodejs-legacy
   - npm install -g npm
 before_script:
   - npm install -g grunt
