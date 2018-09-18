@@ -4,6 +4,7 @@
     var StateMachine = sm.StateMachine;
     var State = sm.State;
     var Event = sm.Event;
+    var anyEvent = sm.anyEvent;
     var _e = Event;
 
     var buildMachine = function(states) {
@@ -351,6 +352,25 @@
         assert.deepEqual(testList, []);
         assert.equal(m.leafState().name, 's211');
 
+    });
+
+    QUnit.test( "Transitions on any event", function( assert ) {
+        var m = new StateMachine('m');
+        var s0 = new State('s0');
+        var s1 = new State('s1');
+        m.addState(s0, true);
+        m.addState(s1);
+        m.addTransition(s0, s1, events=[anyEvent]);
+        m.addTransition(s1, s0, events=[anyEvent]);
+        m.initialize();
+
+        assert.equal(m.leafState().name, 's0', 'Invalid initial state');
+        m.dispatch(new _e('whatever'));
+        assert.equal(m.leafState().name, 's1', 'Invalid target state');
+        m.dispatch(new _e('whatever'));
+        assert.equal(m.leafState().name, 's0', 'Invalid target state');
+        m.dispatch(new _e('abc'));
+        assert.equal(m.leafState().name, 's1', 'Invalid target state');
     });
 
 }());

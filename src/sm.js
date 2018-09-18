@@ -14,6 +14,13 @@ if (typeof exports !== 'undefined') {
 
 sm.id = 0;
 
+sm.anyEvent = {
+    name: 'anyEvent',
+    toString: function () {
+        return 'anyEvent';
+    }
+};
+
 sm.toType = function(obj) {
     return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
 };
@@ -155,8 +162,19 @@ sm.TransitionContainer.prototype._getTransitionMatchingCondition = function(
     key = key.toString();
     var transitions = self._transitions[key] || [];
     var fromState = self.stateMachine.leafState();
+    var transition;
     for (var i = 0; i < transitions.length; i++){
-        var transition = transitions[i];
+        transition = transitions[i];
+        if (transition.condition(fromState, event) === true){
+            return transitions[i];
+        }
+    }
+
+    key = [self.stateMachine.state, sm.anyEvent, event.input];
+    key = key.toString();
+    transitions = self._transitions[key] || [];
+    for (i = 0; i < transitions.length; i++){
+        transition = transitions[i];
         if (transition.condition(fromState, event) === true){
             return transitions[i];
         }
