@@ -21,6 +21,10 @@ sm.anyEvent = {
     }
 };
 
+sm._e = function (name, input, cargo) {
+        return new sm.Event(name, input, cargo);
+};
+
 sm.toType = function(obj) {
     return ({}).toString.call(obj).match(/\s([a-zA-Z]+)/)[1].toLowerCase();
 };
