@@ -126,7 +126,7 @@ sm.State.prototype._on = function (event) {
     }
     // Never propagate exit/enter events, even if propagate is set to True
     if (self.parent && event.propagate &&
-            (event.name !== 'exit' || event.name !== 'enter')){
+            (event.name !== 'exit' && event.name !== 'enter')){
         self.parent._on(event);
     }
 };
